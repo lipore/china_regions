@@ -10,7 +10,7 @@ const sleep = require('system-sleep');
 
 
 
-const host = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/";
+const host = "http://www.stats.gov.cn/sj/tjbz/tjyqhdmhcxhfdm/2023/";
 //这个 ip 是通过 dns 工具直接解析出来的，因为大量爬取需要进行多次 dns 解析，时间长了 nodejs 会报 dns 解析错误
 //应该是有缓存的，但是还是报 dns 解析有问题，这个 ip 可能会变，在使用时可以实时解析一下统计局的网站域名，如果不使用 ip
 //则把 IP 内容换成域名即可
@@ -96,7 +96,7 @@ function requestProvince() {
     }else {
         return newRequestPromise(host).spread(function(response, body) {
             log.info("正在请求 => 省份")
-            return parseProvice(iconv.decode(body, 'gb2312'));
+            return parseProvice(iconv.decode(body, 'utf8'));
         })
     }
     
@@ -121,7 +121,7 @@ function main(){
         let urls = [];
         if (!fileExists.cityPath) {
             respResults.forEach(function(item, index) {
-                urls = urls.concat(parseCity(iconv.decode(item[1], 'gb2312'), host));
+                urls = urls.concat(parseCity(iconv.decode(item[1], 'utf8'), host));
             })
             fs.writeFileSync(CityPath, JSON.stringify(urls));
         } else {
@@ -146,7 +146,7 @@ function main(){
         let urls = [];
         if (!fileExists.countyPath) {
             respResults.forEach(function(item, index) {
-                urls = urls.concat(parseCounty(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
+                urls = urls.concat(parseCounty(iconv.decode(item[1], 'utf8'), absolutePath(item[0].request.href)));
             });
             fs.writeFileSync(CountyPath, JSON.stringify(urls));
         } else {
@@ -170,7 +170,7 @@ function main(){
         let urls = [];
         if (!fileExists.townPath) {
             respResults.forEach(function(item, index) {
-                urls = urls.concat(parseTown(iconv.decode(item[1], 'gb2312'), absolutePath(item[0].request.href)));
+                urls = urls.concat(parseTown(iconv.decode(item[1], 'utf8'), absolutePath(item[0].request.href)));
             });
 
             fs.writeFileSync(TownPath, JSON.stringify(urls));
@@ -193,7 +193,7 @@ function main(){
         let urls = [];
         if (!fileExists.villagePath) {
             respResults.forEach(function(item, index) {
-                urls = urls.concat(parseVillage(iconv.decode(item[1], 'gb2312')));
+                urls = urls.concat(parseVillage(iconv.decode(item[1], 'utf8')));
             });
             fs.writeFileSync(VillagePath, JSON.stringify(urls));
         }
@@ -354,13 +354,13 @@ function pullCountyDataSync(cityPath, offset) {
                     if(fileExists.townPath){
                         urls = JSON.parse(fs.readFileSync(TownPath));
                     }
-                    urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
+                    urls = urls.concat(parseTown(iconv.decode(body, 'utf8'), absolutePath(element.url)));
                     fs.writeFileSync(TownPath, JSON.stringify(urls));
                 } else {
                     if(fileExists.countyPath) {
                         urls = JSON.parse(fs.readFileSync(CountyPath));
                     }
-                    urls = urls.concat(parseCounty(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
+                    urls = urls.concat(parseCounty(iconv.decode(body, 'utf8'), absolutePath(element.url)));
                     fs.writeFileSync(CountyPath, JSON.stringify(urls));    
                 }
                 log.debug('foreach ==> ', offset + index);
@@ -394,7 +394,7 @@ function pullTownDataSync(countyPath, offset) {
                 if(fileExists.townPath){
                     urls = JSON.parse(fs.readFileSync(TownPath));
                 }
-                urls = urls.concat(parseTown(iconv.decode(body, 'gb2312'), absolutePath(element.url)));
+                urls = urls.concat(parseTown(iconv.decode(body, 'utf8'), absolutePath(element.url)));
                 fs.writeFileSync(TownPath, JSON.stringify(urls));
                 log.debug('foreach ==> ', offset + index);
             });
@@ -428,7 +428,7 @@ function pullVillageDataSync(townPath, offset) {
                 if(fileExists.villagePath){
                     urls = JSON.parse(fs.readFileSync(VillagePath));
                 }
-                urls = urls.concat(parseVillage(iconv.decode(body, 'gb2312')));
+                urls = urls.concat(parseVillage(iconv.decode(body, 'utf8')));
                 fs.writeFileSync(VillagePath, JSON.stringify(urls));
                 log.debug('foreach ==> ', offset + index);
             });
@@ -438,7 +438,7 @@ function pullVillageDataSync(townPath, offset) {
 }
 
 
-// main();
+main();
 // pullCountyDataSync(CityPath, 0);
 // pullTownDataSync(CountyPath, 0);
 // pullVillageDataSync(TownPath, 43302); //43302
